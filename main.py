@@ -99,3 +99,6 @@ if data_ready:
     st.pyplot(fig.figure)
 else:
     st.warning('Data is not ready yet')
+
+x = {'Method':method+': '+input_options, 'Method1':mean*2}
+st.table(pd.DataFrame(x))
