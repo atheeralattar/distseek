@@ -79,7 +79,8 @@ else:
         r_hat = st.sidebar.text_input('R', value=.525)
         data = gen.Generator(np.int(n)).gamma(np.float(r_hat), np.float(lambda_hat))
 #
-
+button = st.sidebar.button('Estimate')
+st.write(button)
 # is data ready
 try:
     data_ready = len(data) > 2
@@ -87,13 +88,17 @@ try:
 except:
     data_ready = False
 
-if data_ready:
+if not button and data_ready:
+    st.warning('Click estimate')
+
+
+elif data_ready and button:
     data = pd.DataFrame(data, columns=['data'])
     data2 = pd.DataFrame(data * 3)
     data2.rename({'data': 'data1'})
     sns.set(style="darkgrid")
     fig = sns.kdeplot(data['data'], shade=True, color='r',
-                      label='Method: ' + method+"_"+selected_dist)
+                      label='Method: ' + method + "_" + selected_dist)
     fig = sns.kdeplot(data2['data'], shade=True, color='b', label='Estimated')
     mean = np.mean(data)
     plt.axvline(x=data.mean()[0], color='red')
