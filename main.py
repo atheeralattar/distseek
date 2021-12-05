@@ -16,6 +16,7 @@ st.sidebar.title('Choose a starting point')
 
 method = st.sidebar.radio('', ['Input data', 'Generate data'])
 if method == 'Input data':
+    selected_dist = 'UNKNOWN'
     st.sidebar.title('Choose data input method')
     input_options = st.sidebar.radio('', ['Upload values (*.csv)', 'Paste values'])
     if input_options == 'Paste values':
@@ -40,6 +41,7 @@ if method == 'Input data':
                 st.warning(f"Only first column will be used, uploaded data shape is {data.shape}")
                 data = data.iloc[:, 0]
 else:
+    input_options = "User generated data"
     selected_dist = st.sidebar.selectbox('Select a distribution (default values provided)', DISTRIBUTIONS)
     n = (st.sidebar.text_input('No. of Samples', value=100))
 
@@ -90,8 +92,9 @@ if data_ready:
     data2 = pd.DataFrame(data * 3)
     data2.rename({'data': 'data1'})
     sns.set(style="darkgrid")
-    fig = sns.kdeplot(data['data'], shade=True, color = 'r', label = 'Method: '+method)
-    fig = sns.kdeplot(data2['data'], shade=True, color = 'b', label = 'Estimated')
+    fig = sns.kdeplot(data['data'], shade=True, color='r',
+                      label='Method: ' + method+"_"+selected_dist)
+    fig = sns.kdeplot(data2['data'], shade=True, color='b', label='Estimated')
     mean = np.mean(data)
     plt.axvline(x=data.mean()[0], color='red')
     plt.axvline(x=data2.mean()[0], color='blue')
@@ -99,6 +102,8 @@ if data_ready:
     st.pyplot(fig.figure)
 else:
     st.warning('Data is not ready yet')
-
-x = {'Method':method+': '+input_options, 'Method1':mean*2}
+x = {'Parameter'
+     : ['Method'],
+     'Value': [method + ': ' + input_options]}
+# x = {'Method':method+': '+input_options, 'Method1':mean*2}
 st.table(pd.DataFrame(x))
