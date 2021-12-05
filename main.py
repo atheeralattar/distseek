@@ -33,6 +33,9 @@ if method == 'Input data':
         raw = st.sidebar.file_uploader("Choose a CSV file", accept_multiple_files=False)
         if raw is not None:
             data = pd.read_csv(raw, header=header, names=['data'])
+            data2 = data * 3
+            data2.rename({'data': 'data1'})
+
             if data.shape[1] > 1:
                 st.warning(f"Only first column will be used, uploaded data shape is {data.shape}")
                 data = data.iloc[:, 0]
@@ -83,9 +86,16 @@ except:
     data_ready = False
 
 if data_ready:
-    fig = sns.displot(data, kde=True, height=5, aspect=1.5)
+    data = pd.DataFrame(data, columns=['data'])
+    data2 = pd.DataFrame(data * 3)
+    data2.rename({'data': 'data1'})
+    sns.set(style="darkgrid")
+    fig = sns.kdeplot(data['data'], shade=True, color = 'r', label = 'Method: '+method)
+    fig = sns.kdeplot(data2['data'], shade=True, color = 'b', label = 'Estimated')
     mean = np.mean(data)
     plt.axvline(x=data.mean()[0], color='red')
-    st.pyplot(fig)
+    plt.axvline(x=data2.mean()[0], color='blue')
+    plt.legend()
+    st.pyplot(fig.figure)
 else:
     st.warning('Data is not ready yet')
