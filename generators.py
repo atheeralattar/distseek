@@ -1,6 +1,6 @@
 import numpy as np
 from scipy.stats import bernoulli, weibull_min
-#
+
 
 class Generator:
     """
@@ -10,6 +10,19 @@ class Generator:
     def __init__(self, no_samples):
         """Constructor for generator"""
         self.no_samples = no_samples
+
+    def uniform(self, a, b):
+        """
+        Uniform dist generator
+        ....
+
+        inputs
+        -------
+        a : low
+        b : high
+        """
+        data = np.random.uniform(a, b, size=self.no_samples)
+        return data
 
     def normal(self, mu, sigma):
         """
@@ -57,7 +70,7 @@ class Generator:
         -------
         rate   : lambda
         """
-        data = np.random.exponential(1/rate, size=self.no_samples)
+        data = np.random.exponential(1 / rate, size=self.no_samples)
         return data
 
     def gamma(self, shape, scale):
