@@ -10,7 +10,6 @@ class Generator:
     def __init__(self, no_samples):
         """Constructor for generator"""
         self.no_samples = no_samples
-
     def uniform(self, a, b):
         """
         Uniform dist generator
@@ -70,7 +69,7 @@ class Generator:
         -------
         rate   : lambda
         """
-        data = np.random.exponential(1 / rate, size=self.no_samples)
+        data = np.random.exponential(1/rate, size=self.no_samples)
         return data
 
     def gamma(self, shape, scale):

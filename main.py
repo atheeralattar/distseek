@@ -6,8 +6,9 @@ import seaborn as sns
 import generators as gen
 import plotting
 import re
+from estimator import estimate
 
-DISTRIBUTIONS = ['Normal', 'Geometric', 'Uniform', 'Bernoulli', 'Weibull', 'Gamma']
+DISTRIBUTIONS = ['Normal', 'Geometric', 'Exponential', 'Uniform', 'Bernoulli', 'Weibull', 'Gamma']
 warning = ''
 
 st.header('DistSeek: A library to guess the input data distribution')
@@ -49,7 +50,9 @@ else:
         mu = st.sidebar.text_input('Mean', value=np.float(10))
         sigma = st.sidebar.text_input('Standard Deviation', value=np.float(2))
         data = gen.Generator(np.int(n)).normal(np.float(mu), np.float(sigma))
-
+    elif selected_dist == 'Exponential':
+        lmbda = st.sidebar.text_input('Lambda', value=np.float(10))
+        data = gen.Generator(np.int(n)).exponential(np.float(lmbda))
     elif selected_dist == 'Geometric':
         p = np.float(st.sidebar.text_input('P', value=.7))
         if p > 1:
@@ -93,16 +96,50 @@ if not button and data_ready:
 
 
 elif data_ready and button:
+    n = data.shape[0]
     data = pd.DataFrame(data, columns=['data'])
-    data2 = pd.DataFrame(data * 3)
-    data2.rename({'data': 'data1'})
+
+    # generate predicted data
+    st.write(estimate(data['data']))
+
+    if estimate(data['data']).index[0] == 'geometric':
+        predicted = gen.Generator(n).geometric(np.float(estimate(data['data'])['p_hat']))
+        predicted = pd.DataFrame(predicted, columns=['data'])
+    elif estimate(data['data']).index[0] == 'normal':
+        mu = np.float(estimate(data['data'])['mu'])
+        std = np.float(estimate(data['data'])['std'])
+        predicted = gen.Generator(n).normal(mu, std)
+        predicted = pd.DataFrame(predicted, columns=['data'])
+    elif estimate(data['data']).index[0] == 'uniform':
+        a = np.float(estimate(data['data'])['a'])
+        b = np.float(estimate(data['data'])['b'])
+        predicted = gen.Generator(n).uniform(a,b)
+        predicted = pd.DataFrame(predicted, columns=['data'])
+    elif estimate(data['data']).index[0] == 'Bernoulli':
+        p = np.float(estimate(data['data'])['p'])
+        predicted = gen.Generator(n).bern(p)
+        predicted = pd.DataFrame(predicted, columns=['data'])
+    elif estimate(data['data']).index[0] == 'exponential':
+        lmbda_hat = np.float(estimate(data['data'])['lambda'])
+        predicted = gen.Generator(n).exponential(lmbda_hat)
+        predicted = pd.DataFrame(predicted, columns=['data'])
+    elif estimate(data['data']).index[0] == 'gamma':
+        scale = np.float(estimate(data['data'])['scale'])
+        shape = np.float(estimate(data['data'])['shape'])
+        predicted = gen.Generator(n).gamma(shape, scale)
+        predicted = pd.DataFrame(predicted, columns=['data'])
+
+
+
+
+    predicted.rename({'data': 'data1'})
     sns.set(style="darkgrid")
     fig = sns.kdeplot(data['data'], shade=True, color='r',
                       label='Method: ' + method + "_" + selected_dist)
-    fig = sns.kdeplot(data2['data'], shade=True, color='b', label='Estimated')
+    fig = sns.kdeplot(predicted['data'], shade=True, color='b', label='Estimated')
     mean = np.mean(data)
     plt.axvline(x=data.mean()[0], color='red')
-    plt.axvline(x=data2.mean()[0], color='blue')
+    plt.axvline(x=predicted.mean()[0], color='blue')
     plt.legend()
     st.pyplot(fig.figure)
 else:
