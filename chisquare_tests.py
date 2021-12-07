@@ -240,8 +240,8 @@ def chsq_weibull(df):
                        'p_value': chisq.pvalue,
                        'reject_H0': chisq.pvalue < 0.05,
                        'guessed_dist': 'Weibull',
-                       'lambda': lmbda,
-                       'r_hat': r_hat}
+                       'shape': lmbda,
+                       'scale': r_hat}
 
         if np.isnan(test_result['chisquare']):
             test_result = {'chisquare': 999,

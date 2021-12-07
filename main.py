@@ -26,7 +26,7 @@ if method == 'Input data':
         data = pd.DataFrame(data, columns=['data'])
 
     else:
-        header = st.sidebar.selectbox('Data start at row:', [0, 1])
+        header = st.sidebar.selectbox('Data start at row:', [1, 0])
         if header == 0:
             header = None
         else:
@@ -35,8 +35,6 @@ if method == 'Input data':
         raw = st.sidebar.file_uploader("Choose a CSV file", accept_multiple_files=False)
         if raw is not None:
             data = pd.read_csv(raw, header=header, names=['data'])
-            data2 = data * 3
-            data2.rename({'data': 'data1'})
 
             if data.shape[1] > 1:
                 st.warning(f"Only first column will be used, uploaded data shape is {data.shape}")
@@ -83,7 +81,6 @@ else:
         data = gen.Generator(np.int(n)).gamma(np.float(r_hat), np.float(lambda_hat))
 #
 button = st.sidebar.button('Estimate')
-st.write(button)
 # is data ready
 try:
     data_ready = len(data) > 2
@@ -100,10 +97,13 @@ elif data_ready and button:
     data = pd.DataFrame(data, columns=['data'])
 
     # generate predicted data
-    st.write(estimate(data['data']))
-
+    try:
+        st.write(estimate(data['data']).drop_duplicates(subset='chisquare').dropna(axis = 1))
+    except:
+        st.write(estimate(data['data']))
     if estimate(data['data']).index[0] == 'geometric':
-        predicted = gen.Generator(n).geometric(np.float(estimate(data['data'])['p_hat']))
+        predicted = gen.Generator(n).geometric(
+            np.float(estimate(data['data']).drop_duplicates(subset='chisquare')['p_hat']))
         predicted = pd.DataFrame(predicted, columns=['data'])
     elif estimate(data['data']).index[0] == 'normal':
         mu = np.float(estimate(data['data'])['mu'])
@@ -111,26 +111,28 @@ elif data_ready and button:
         predicted = gen.Generator(n).normal(mu, std)
         predicted = pd.DataFrame(predicted, columns=['data'])
     elif estimate(data['data']).index[0] == 'uniform':
-        a = np.float(estimate(data['data'])['a'])
-        b = np.float(estimate(data['data'])['b'])
-        predicted = gen.Generator(n).uniform(a,b)
+        a = np.float(estimate(data['data']).drop_duplicates(subset='chisquare')['a'])
+        b = np.float(estimate(data['data']).drop_duplicates(subset='chisquare')['b'])
+        predicted = gen.Generator(n).uniform(a, b)
         predicted = pd.DataFrame(predicted, columns=['data'])
     elif estimate(data['data']).index[0] == 'Bernoulli':
         p = np.float(estimate(data['data'])['p'])
         predicted = gen.Generator(n).bern(p)
         predicted = pd.DataFrame(predicted, columns=['data'])
     elif estimate(data['data']).index[0] == 'exponential':
-        lmbda_hat = np.float(estimate(data['data'])['lambda'])
+        lmbda_hat = np.float(estimate(data['data']).drop_duplicates(subset='chisquare')['lambda'])
         predicted = gen.Generator(n).exponential(lmbda_hat)
         predicted = pd.DataFrame(predicted, columns=['data'])
     elif estimate(data['data']).index[0] == 'gamma':
-        scale = np.float(estimate(data['data'])['scale'])
-        shape = np.float(estimate(data['data'])['shape'])
+        scale = np.float(estimate(data['data']).drop_duplicates(subset='chisquare')['scale'][0])
+        shape = np.float(estimate(data['data']).drop_duplicates(subset='chisquare')['shape'][0])
         predicted = gen.Generator(n).gamma(shape, scale)
         predicted = pd.DataFrame(predicted, columns=['data'])
-
-
-
+    elif estimate(data['data']).index[0] == 'weibull':
+        scale = np.float(estimate(data['data']).drop_duplicates(subset='chisquare')['scale'][0])
+        shape = np.float(estimate(data['data']).drop_duplicates(subset='chisquare')['shape'][0])
+        predicted = gen.Generator(n).weibull(shape, scale)
+        predicted = pd.DataFrame(predicted, columns=['data'])
 
     predicted.rename({'data': 'data1'})
     sns.set(style="darkgrid")

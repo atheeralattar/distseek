@@ -7,7 +7,7 @@ def estimate(df):
     """
     Final distribution estimator
     """
-    print(df)
+
     if np.array_equal(np.unique(df), [0, 1]):
         p = np.count_nonzero(df) / len(df)
         final_results = {'guessed_dist': 'Bernoulli', 'p': p}
@@ -25,9 +25,9 @@ def estimate(df):
         final_results = final_results.query('chisquare==chisquare.min()')
 
         #selecting min p_value in case of tie
-        final_results = final_results.query('p_value==p_value.max()')
 
 
-        final_results['score'] = (final_results['chisquare']) * (final_results['p_value'])
-        final_results.dropna(axis =1, inplace = True)
+        #final_results.dropna(axis=1, inplace = True)
+
+        print(final_results)
     return final_results
