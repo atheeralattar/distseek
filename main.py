@@ -98,7 +98,7 @@ elif data_ready and button:
 
     # generate predicted data
     try:
-        st.write(estimate(data['data']).drop_duplicates(subset='chisquare').dropna(axis = 1))
+        st.table(estimate(data['data']).drop_duplicates(subset='chisquare').dropna(axis = 1))
     except:
         st.write(estimate(data['data']))
     if estimate(data['data']).index[0] == 'geometric':
